@@ -70,6 +70,9 @@ http {
 
             proxy_pass           https://auth_service;
             proxy_ssl_server_name on;
+            # SNI must carry the real public hostname (proxy_pass only sees
+            # the upstream block name "auth_service", which the edge rejects).
+            proxy_ssl_name       ${AUTH_UPSTREAM};
             # Generous timeouts: free-tier upstreams can cold-start ~60s.
             proxy_connect_timeout 75s;
             proxy_send_timeout    75s;
@@ -101,6 +104,8 @@ http {
 
             proxy_pass           https://game_service;
             proxy_ssl_server_name on;
+            # SNI must carry the real public hostname (see auth location).
+            proxy_ssl_name       ${GAME_UPSTREAM};
             # Generous timeouts: free-tier upstreams can cold-start ~60s.
             proxy_connect_timeout 75s;
             proxy_send_timeout    75s;
