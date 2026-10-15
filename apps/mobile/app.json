@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "reflex-mobile",
+    "slug": "reflex-mobile",
+    "version": "1.0.0",
+    "scheme": "reflex-mobile",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": ["**/*"]
+  }
+}

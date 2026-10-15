@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/client.ts","./src/components/gameboard.tsx","./src/components/leaderboard.tsx","./src/components/navbar.tsx","./src/components/reactiongraph.tsx","./src/context/authcontext.tsx","./src/hooks/usegame.ts"],"version":"5.9.3"}

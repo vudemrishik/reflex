@@ -1,0 +1,12 @@
+{
+  "name": "reflex-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "REFLEX reaction arcade — npm workspaces monorepo (web + mobile + shared engine).",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=@reflex/web",
+    "build:web": "npm run build --workspace=@reflex/web",
+    "typecheck:engine": "npm run typecheck --workspace=@reflex/engine"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@reflex/engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Platform-agnostic reaction-game engine shared by web (Vite) and mobile (Expo). Zero React/DOM imports.",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

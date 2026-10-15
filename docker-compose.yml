@@ -1,0 +1,102 @@
+services:
+  # ─────────────────────────────────────────────
+  #  Data Stores
+  # ─────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-reflex}
+      POSTGRES_USER: ${POSTGRES_USER:-reflex}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-reflex_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-reflex}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────────
+  #  Microservices
+  # ─────────────────────────────────────────────
+  auth-service:
+    build: ./auth-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-reflex}:${POSTGRES_PASSWORD:-reflex_secret}@postgres:5432/${POSTGRES_DB:-reflex}
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-in-production}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-http://localhost/api/auth/google/callback}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    expose:
+      - "8001"
+
+  game-service:
+    build: ./game-service
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-reflex}:${POSTGRES_PASSWORD:-reflex_secret}@postgres:5432/${POSTGRES_DB:-reflex}
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-change-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-session-signing-secret-change-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose:
+      - "8002"
+
+  # ─────────────────────────────────────────────
+  #  Web frontend (Vite dev server, monorepo workspace)
+  # ─────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ./apps/web/src:/app/apps/web/src
+      - ./apps/web/index.html:/app/apps/web/index.html
+      - ./packages/engine/src:/app/packages/engine/src
+    expose:
+      - "5173"
+
+  # ─────────────────────────────────────────────
+  #  API Gateway (Nginx reverse proxy)
+  # ─────────────────────────────────────────────
+  gateway:
+    build: ./gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-service
+      - game-service
+      - frontend
+
+volumes:
+  postgres_data:
+  redis_data:
