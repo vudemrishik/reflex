@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     # ── Frontend ───────────────────────────────────────────
     frontend_url: str = "http://localhost"
 
+    # ── Cookie (cross-site frontend needs samesite=none + secure=true) ──
+    cookie_secure: bool = False
+    cookie_samesite: str = "lax"
+
     model_config = {"env_file": ".env", "extra": "ignore"}
 
 

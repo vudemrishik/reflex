@@ -141,14 +141,16 @@ async def google_callback(code: str):
     # 4. Issue JWT
     jwt_token = _issue_jwt(row)
 
-    # 5. Set HttpOnly cookie and redirect to frontend
+    # 5. Set HttpOnly cookie and redirect to frontend.
+    # Local http dev keeps lax+insecure; production (Vercel → gateway,
+    # cross-site) needs samesite=none + secure via env.
     redirect = RedirectResponse(url=settings.frontend_url, status_code=302)
     redirect.set_cookie(
         key=COOKIE_KEY,
         value=jwt_token,
         httponly=True,
-        samesite="lax",
-        secure=False,  # ← set True behind HTTPS in production
+        samesite=settings.cookie_samesite,  # type: ignore[arg-type]
+        secure=settings.cookie_secure,
         max_age=settings.jwt_expiry_hours * 3600,
         path="/",
     )
