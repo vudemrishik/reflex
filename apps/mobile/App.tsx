@@ -200,11 +200,26 @@ function GameScreen() {
         </Pressable>
       </View>
 
-      {/* ── Idle / Game Over ── */}
+      {/* ── Idle / Countdown / Game Over ── */}
       {state.status === "idle" && (
         <Pressable onPress={() => void start()} style={styles.primaryBtn}>
           <Text style={styles.primaryBtnText}>▶ Start Game</Text>
         </Pressable>
+      )}
+
+      {state.status === "countdown" && (
+        <View style={styles.countdown}>
+          <Text style={styles.countdownLabel}>GET READY…</Text>
+          <Text
+            key={Math.ceil(state.countdownRemaining)}
+            style={styles.countdownNum}
+          >
+            {Math.ceil(state.countdownRemaining)}
+          </Text>
+          <Text style={styles.countdownHint}>
+            Tap the HIGHER number — 1 second per round.
+          </Text>
+        </View>
       )}
 
       {gameover && (
@@ -376,6 +391,30 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     textAlign: "center",
     marginBottom: 12,
+  },
+  countdown: {
+    marginTop: 24,
+    alignItems: "center",
+    paddingVertical: 40,
+  },
+  countdownLabel: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 3,
+  },
+  countdownNum: {
+    color: "#a78bfa",
+    fontSize: 120,
+    fontWeight: "900",
+    marginTop: 8,
+    fontVariant: ["tabular-nums"],
+  },
+  countdownHint: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 13,
+    marginTop: 12,
+    textAlign: "center",
   },
   statRow: {
     flexDirection: "row",

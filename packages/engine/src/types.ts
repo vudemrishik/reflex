@@ -19,6 +19,10 @@ export interface GameState {
   roundStartedAt: number;
   /** Fraction of time remaining in the current round [0..1] */
   timeRemaining: number;
+  /** Seconds remaining in the pre-game countdown (only when status === "countdown") */
+  countdownRemaining: number;
+  /** High-res timestamp when the countdown began (via performance.now()) */
+  countdownStartedAt: number;
   /** Reaction time (ms) of every successful click in this session */
   reactionTimes: number[];
 }

@@ -60,9 +60,11 @@ function GameScreen() {
   const { time_saved_ms, total_successes, avg_response_time_ms } =
     game.metrics;
 
-  // Keyboard controls: ← / → (also A / D).
+  // Keyboard controls: ← / → (also A / D). Enter restarts only
+  // from idle/gameover — never mid-countdown.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (game.state.status === "countdown") return;
       if (game.state.status !== "playing") {
         if (e.key === "Enter" || e.key === " ") void game.start();
         return;
@@ -129,6 +131,23 @@ function GameScreen() {
               }
             >
               <GameBoard state={game.state} onPick={game.pick} />
+            </div>
+          )}
+
+          {status === "countdown" && (
+            <div className="animate-fade-in py-14 text-center">
+              <div className="text-sm font-bold uppercase tracking-widest text-white/40">
+                Get ready…
+              </div>
+              <div
+                key={Math.ceil(game.state.countdownRemaining)}
+                className="mt-2 animate-number-pop font-mono text-9xl font-black text-accent-light"
+              >
+                {Math.ceil(game.state.countdownRemaining)}
+              </div>
+              <p className="mt-4 text-sm text-white/50">
+                Click the HIGHER number — you have 1 second per round.
+              </p>
             </div>
           )}
 

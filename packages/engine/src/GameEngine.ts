@@ -14,6 +14,7 @@ import type { GameState, GameStateCallback } from "./types";
 export class GameEngine {
   // ── Config ─────────────────────────────────────────────
   private readonly ROUND_MS = 1000; // 1-second rounds
+  private readonly COUNTDOWN_MS = 3000; // 3-second pre-game countdown
   private readonly MIN_NUM = 1;
   private readonly MAX_NUM = 99;
 
@@ -37,26 +38,41 @@ export class GameEngine {
       roundStartedAt: 0,
       timeRemaining: 1,
       reactionTimes: [],
+      countdownRemaining: 0,
+      countdownStartedAt: 0,
     };
   }
 
   // ── Public API ─────────────────────────────────────────
 
-  /** Kick off a new game. */
+  /** Kick off a new game: 3-sec countdown, then the first round. */
   start(): void {
     this.cancelRaf();
-    const [a, b] = this.generatePair();
     this.state = {
-      status: "playing",
+      status: "countdown",
       score: 0,
-      numberA: a,
-      numberB: b,
-      roundStartedAt: performance.now(),
+      numberA: 0,
+      numberB: 0,
+      roundStartedAt: 0,
       timeRemaining: 1,
       reactionTimes: [],
+      countdownRemaining: this.COUNTDOWN_MS / 1000,
+      countdownStartedAt: performance.now(),
     };
     this.emit();
     this.scheduleRaf();
+  }
+
+  /** Transition from countdown into the first live round. */
+  private beginRound(): void {
+    const [a, b] = this.generatePair();
+    this.state.status = "playing";
+    this.state.numberA = a;
+    this.state.numberB = b;
+    this.state.roundStartedAt = performance.now();
+    this.state.timeRemaining = 1;
+    this.state.countdownRemaining = 0;
+    this.emit();
   }
 
   /** The player clicked a number card. */
@@ -106,6 +122,22 @@ export class GameEngine {
   }
 
   private tick = (): void => {
+    if (this.state.status === "countdown") {
+      const elapsed = performance.now() - this.state.countdownStartedAt;
+      const remaining = (this.COUNTDOWN_MS - elapsed) / 1000;
+
+      if (remaining <= 0) {
+        this.beginRound();
+        this.scheduleRaf();
+        return;
+      }
+
+      this.state.countdownRemaining = remaining;
+      this.emit();
+      this.scheduleRaf();
+      return;
+    }
+
     if (this.state.status !== "playing") return;
 
     const elapsed = performance.now() - this.state.roundStartedAt;
