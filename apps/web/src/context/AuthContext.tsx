@@ -12,6 +12,7 @@ import {
 } from "react";
 import {
   fetchCurrentUser,
+  getGoogleLoginUrl,
   logout as apiLogout,
   type User,
 } from "../api/client";
@@ -42,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const login = useCallback(() => {
-    window.location.href = "/api/auth/google/login";
+    window.location.href = getGoogleLoginUrl();
   }, []);
 
   const logout = useCallback(async () => {

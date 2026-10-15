@@ -3,7 +3,9 @@
  * All endpoints are same-origin so cookies are sent automatically.
  */
 
-const BASE = ""; // same origin — gateway proxies everything
+const BASE =
+  import.meta.env.BACKEND_API_URL?.replace(/\/+$/, "") ??
+  ""; // empty = same origin (Docker gateway proxies everything)
 
 export interface User {
   id: string;
