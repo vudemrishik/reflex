@@ -142,8 +142,11 @@ async def google_callback(code: str):
     jwt_token = _issue_jwt(row)
 
     # 5. Set HttpOnly cookie and redirect to frontend.
-    # Local http dev keeps lax+insecure; production (Vercel → gateway,
-    # cross-site) needs samesite=none + secure via env.
+    # Production login runs cross-site (gateway callback, vercel.app API
+    # calls), so the cookie needs SameSite=None; Secure (via env) PLUS the
+    # Partitioned attribute (CHIPS) — otherwise Chrome blocks it as a
+    # third-party cookie and /me 401s forever. Appended manually: older
+    # Starlette set_cookie() has no partitioned parameter.
     redirect = RedirectResponse(url=settings.frontend_url, status_code=302)
     redirect.set_cookie(
         key=COOKIE_KEY,
@@ -154,6 +157,10 @@ async def google_callback(code: str):
         max_age=settings.jwt_expiry_hours * 3600,
         path="/",
     )
+    if settings.cookie_secure and settings.cookie_samesite.lower() == "none":
+        redirect.headers["set-cookie"] = (
+            redirect.headers["set-cookie"] + "; Partitioned"
+        )
     return redirect
 
 
