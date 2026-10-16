@@ -2,6 +2,26 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
+      "source": "/api/auth/google/login",
+      "destination": "https://reflex-gateway.onrender.com/api/auth/google/login"
+    },
+    {
+      "source": "/api/auth/google/callback",
+      "destination": "https://reflex-gateway.onrender.com/api/auth/google/callback"
+    },
+    {
+      "source": "/api/auth/me",
+      "destination": "https://reflex-gateway.onrender.com/api/auth/me"
+    },
+    {
+      "source": "/api/auth/logout",
+      "destination": "https://reflex-gateway.onrender.com/api/auth/logout"
+    },
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://reflex-gateway.onrender.com/api/v1/:path*"
+    },
+    {
       "source": "/api/:path*",
       "destination": "https://reflex-gateway.onrender.com/api/:path*"
     }
