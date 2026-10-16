@@ -141,13 +141,16 @@ async def google_callback(code: str):
     # 4. Issue JWT
     jwt_token = _issue_jwt(row)
 
-    # 5. Set HttpOnly cookie and redirect to frontend.
-    # Production login runs cross-site (gateway callback, vercel.app API
-    # calls), so the cookie needs SameSite=None; Secure (via env) PLUS the
-    # Partitioned attribute (CHIPS) — otherwise Chrome blocks it as a
-    # third-party cookie and /me 401s forever. Appended manually: older
-    # Starlette set_cookie() has no partitioned parameter.
-    redirect = RedirectResponse(url=settings.frontend_url, status_code=302)
+    # 5. Set HttpOnly cookie (helps same-domain setups) and redirect to
+    # the frontend WITH the token in the URL fragment. Fragments never
+    # leave the browser (no server-log leakage), letting cross-site SPAs
+    # adopt the Bearer flow: JS reads it once, stores it, scrubs the URL.
+    # (Cookie path retained: bounce-tracking mitigation + third-party
+    # blocking make cross-site cookies unreliable; Bearer is primary.)
+    redirect = RedirectResponse(
+        url=f"{settings.frontend_url}#access_token={jwt_token}",
+        status_code=302,
+    )
     redirect.set_cookie(
         key=COOKIE_KEY,
         value=jwt_token,

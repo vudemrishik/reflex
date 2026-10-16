@@ -13,6 +13,7 @@ import {
 import {
   fetchCurrentUser,
   getGoogleLoginUrl,
+  takeTokenFromUrl,
   logout as apiLogout,
   type User,
 } from "../api/client";
@@ -33,6 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     setLoading(true);
+    takeTokenFromUrl(); // pick up #access_token from the OAuth callback redirect
     const u = await fetchCurrentUser();
     setUser(u);
     setLoading(false);
